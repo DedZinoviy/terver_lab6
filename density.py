@@ -2,6 +2,7 @@ import math
 import numpy as np
 
 def getDensity(a, sigma):
+    '''Возращает строковое представление плотности со значениями'''
     k1 = 1 / (sigma * math.sqrt(2 * math.pi))
     k2 = -1 / (2 * math.pow(sigma, 2))
 
@@ -13,6 +14,7 @@ def getDensity(a, sigma):
 
 
 def densityFunction(a : float, sigma : float, x : np.ndarray) -> np.ndarray:
+    '''Функция расчёта значений функции в точках Х'''
     k1 = 1 / (sigma * math.sqrt(2 * math.pi))
     k2 = -1 / (2 * math.pow(sigma, 2))
     y = []
@@ -24,6 +26,7 @@ def densityFunction(a : float, sigma : float, x : np.ndarray) -> np.ndarray:
 
 
 def mergeIntervals(intervals, frequency):
+    '''Функция объединения интервало: объединяет интервалы, если частота меньше 5'''
     intervalsAmount = len(intervals)
 
     i = 0

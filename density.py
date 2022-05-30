@@ -60,7 +60,7 @@ def transformBorders(bordersList, a, sigma):
     bordersList[len(bordersList) - 1][1] = np.Infinity
 
 
-def getPropability(transformedIntervals):
+def getPropabilities(transformedIntervals):
     '''Функция вычисления вероятностей'''
     propabilities = []
     for interval in transformedIntervals:
@@ -74,6 +74,12 @@ def propabilityFunction(x):
     return np.exp(-x ** 2 / 2)
 
 
+def getTheoreticPropabilities(propabilities, frequency):
+    n = sum(frequency)
+    theoreticPropabilities = [n * p for p in propabilities]
+    return theoreticPropabilities
+
+
 def main():
     '''Тест из методички'''
     intervals = [[40, 42], [42, 44], [44, 46], [46, 48], [48, 50]]
@@ -85,8 +91,11 @@ def main():
 
     transformBorders(intervals, a, sigma)
 
-    print(getPropability(intervals))
-    print(sum(getPropability(intervals)))
+    propabilities = getPropabilities(intervals)
+
+    print(propabilities)
+    print(sum(propabilities))
+    print(getTheoreticPropabilities(propabilities, frequency))
 
 
 main()

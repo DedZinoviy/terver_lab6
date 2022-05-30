@@ -74,10 +74,10 @@ def propabilityFunction(x):
     return np.exp(-x ** 2 / 2)
 
 
-def getTheoreticPropabilities(propabilities, frequency):
+def getTheoreticFrequency(propabilities, frequency):
     n = sum(frequency)
-    theoreticPropabilities = [n * p for p in propabilities]
-    return theoreticPropabilities
+    theoreticFrequency = [n * p for p in propabilities]
+    return theoreticFrequency
 
 
 def main():
@@ -93,9 +93,8 @@ def main():
 
     propabilities = getPropabilities(intervals)
 
-    print(propabilities)
-    print(sum(propabilities))
-    print(getTheoreticPropabilities(propabilities, frequency))
+    print(frequency)
+    print(getTheoreticFrequency(propabilities, frequency))
 
 
 main()

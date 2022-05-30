@@ -1,3 +1,4 @@
+from operator import truediv
 from xmlrpc.server import SimpleXMLRPCDispatcher
 import numpy as np
 from collections import defaultdict
@@ -37,5 +38,19 @@ thirty = {0.995 : 13.8, 0.99 : 15, 0.975 : 16.8, 0.95 : 18.5, 0.9 : 20.6, 0.75 :
 
 
 pirson = {1 : one, 2 : two, 3 : three, 4 : four, 5 : five, 6 : six, 7 : seven, 8 : eight, 9 : nine, 10 : ten, 11 : eleven, 12 : twelve, 13 : thirteen, 14 : fourteen, 15 : fifteen, 16 : sixteen, 17 : seventeen, 18 : eighteen, 19 : nineteen, 20 : twenty, 21 : twentyOne, 22 : twentyTwo, 23 : twentyThree, 24 : twentyFour, 25 : twentyFive, 26 : twentySix, 27 : twentySeven, 28 : twentyEight, 29 : twentyNine, 30 : thirty}
+
+def khi_emp(numberOfIntervals : int, theoreticFrequenceList : list(int), empericFrequenceList : list(int)):
+    '''Функция для расчёта Хи квадрат наблюдаемое'''
+    khi = 0
+    for i in range(0, numberOfIntervals - 1):
+        khi += (pow(empericFrequenceList[i]-theoreticFrequenceList[i], 2))/theoreticFrequenceList[i]
+    return khi
+
+def isEqualKhi(empericKhi : float, criticalKhi : float):
+    '''Функция сравнения Хи квадрат наблюдаемого и Хи квадрат критического'''
+    if empericKhi <= criticalKhi:
+        return True
+    else:
+        return False
 
 print(pirson[22][0.9])

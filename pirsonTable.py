@@ -53,11 +53,4 @@ def isEqualKhi(empericKhi : float, criticalKhi : float):
     else:
         return False
 
-def transformBorders(bordersList, a, sigma):
-    '''Функция преобразования границ интервалов'''
-    for interval in bordersList:
-        interval[0] = (interval[0] - a)/sigma
-        interval[1] = (interval[1] - a)/sigma
-
-
 print(pirson[22][0.9])

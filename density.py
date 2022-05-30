@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from scipy import integrate
 
 def getDensity(a, sigma):
     '''Возращает строковое представление плотности со значениями'''
@@ -47,3 +48,45 @@ def mergeIntervals(intervals, frequency):
         
         else:
             i += 1
+
+
+def transformBorders(bordersList, a, sigma):
+    '''Функция преобразования границ интервалов'''
+    for interval in bordersList:
+        interval[0] = (interval[0] - a)/sigma
+        interval[1] = (interval[1] - a)/sigma
+    
+    bordersList[0][0] = -np.Infinity
+    bordersList[len(bordersList) - 1][1] = np.Infinity
+
+
+def getPropability(transformedIntervals):
+    '''Функция вычисления вероятностей'''
+    propabilities = []
+    for interval in transformedIntervals:
+        propability, err = integrate.quad(propabilityFunction, interval[0], interval[1]) #зачем тут err, я не знаю, но без него не работает :)
+        propability *= 1 / np.sqrt(2 * np.pi)
+        propabilities.append(propability)
+    return propabilities
+
+
+def propabilityFunction(x):
+    return np.exp(-x ** 2 / 2)
+
+
+def main():
+    '''Тест из методички'''
+    intervals = [[40, 42], [42, 44], [44, 46], [46, 48], [48, 50]]
+    frequency = [8, 25, 35, 22, 10]
+    a = 45.02
+    sigma = 2.182
+
+    mergeIntervals(intervals, frequency)
+
+    transformBorders(intervals, a, sigma)
+
+    print(getPropability(intervals))
+    print(sum(getPropability(intervals)))
+
+
+main()

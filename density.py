@@ -95,6 +95,3 @@ def main():
 
     print(frequency)
     print(getTheoreticFrequency(propabilities, frequency))
-
-
-main()

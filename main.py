@@ -1,4 +1,6 @@
 import statistics
+from turtle import color, width
+from xml.etree.ElementInclude import DEFAULT_MAX_INCLUSION_DEPTH
 import density
 import pirsonTable as pt
 from statisticalDataBigArray import Statistic
@@ -92,29 +94,33 @@ class mywindow(QtWidgets.QMainWindow):
         super(mywindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.showMaximized()
+        
 
         self.dialog = dialogwindow(parent=self)
         
         self.pen = pg.mkPen(color='r', width=3)
-        self.pen1 = pg.mkPen(color='r', width=2, style=QtCore.Qt.DashLine)
+        self.pen1 = pg.mkPen(color='b', width=3)
+        self.pen2 = pg.mkPen(color='g', width=3)
         self.style1 = {'font-size':'30px'}
         font = QtGui.QFont()
         font.setPointSize(12)
 
-        self.ui.graph = pg.PlotWidget()
+        #self.ui.graphWidget = pg.PlotWidget()
         self.ui.graph.setBackground((225, 225, 225))
-        '''self.ui.graph.getAxis('left').setPen('black')
+        self.ui.graph.getAxis('left').setPen('black')
         self.ui.graph.getAxis('left').setTextPen('black')
         self.ui.graph.getAxis("left").setStyle(tickFont = font)
         self.ui.graph.getAxis('bottom').setPen('black')
         self.ui.graph.getAxis('bottom').setTextPen('black')
         self.ui.graph.getAxis("bottom").setStyle(tickFont = font)
-        self.ui.graph.showGrid(x=True, y=True, alpha=0.6)'''
+        self.ui.graph.showGrid(x=True, y=True, alpha=0.6)
 
 
         self.ui.openFileAction.triggered.connect(self.openFile)
         self.ui.alpha.currentIndexChanged.connect(self.changeXi2crit)
         self.ui.compareButton.clicked.connect(self.compareXi2)
+        self.ui.inputIntervalSeriesAction.triggered.connect(self.openDialog)
         #self.ui.plotType.currentIndexChanged.connect(self.buildPlot)
         #self.ui.openFileAction.triggered.connect(self.openFile)
         #self.ui.rangeType.currentIndexChanged.connect(self.changeRangeType)
@@ -125,7 +131,6 @@ class mywindow(QtWidgets.QMainWindow):
         self.rangeType = 0
 
     def solve(self):
-        #self.ui.spinBox.setValue(self.statistic.amount)
         self.setTables()
         self.setCharacteristic()
         self.setPointAssessments()
@@ -133,13 +138,23 @@ class mywindow(QtWidgets.QMainWindow):
         self.setDensity()
         self.buildPlot()     
 
+    def openDialog(self):
+        if self.dialog.exec():
+                try:
+                    self.solve()
+                    self.ui.InitionalArray.setText("Задан интервальный ряд")
+                except:
+                    pass
+        else:
+            print("Cansel")
+
     def compareXi2(self):
         try:
             empXi = float(self.ui.xi2.text())
             critXi = float(self.ui.xi2crit.text())
             resCompare = pt.Pirson.isEqualKhi(empXi, critXi)
             if (resCompare):
-                strCompare = "Принимаем гипотезу о соответствии нормальному распределению"
+                strCompare = "Эмпирические данные не противоречат гипотезе о соответствии нормальному распределению"
             else:
                 strCompare = "Отвергаем гипотезу о соответствии нормальному распределению"
             
@@ -194,14 +209,15 @@ class mywindow(QtWidgets.QMainWindow):
     def setCharacteristic(self):
         midX = "{:01.8}".format(self.statistic.average_sample)
         d = "{:01.8}".format(self.statistic.dispersion)
-        sigma = "{:01.8}".format(self.statistic.deviation)
+        S = "{:01.8}".format(self.statistic.corrected_deviation)
 
         self.ui.averageSample.setText(midX)
         self.ui.sampleDispersion.setText(d)
-        self.ui.sampleAverageSquareDeviation.setText(sigma)
+        self.ui.sampleAverageSquareDeviation.setText(S)
 
     def setTables(self):
         countColumns = density.mergeIntervals(self.statistic.interval_series, self.statistic.frequency) #объединение интервалов
+        self.statistic.countStatistic()
         self.ui.intervalSeries.setColumnCount(countColumns) #Установка количества колонок
         self.ui.theoreticalFrequencies.setColumnCount(countColumns)
 
@@ -216,23 +232,27 @@ class mywindow(QtWidgets.QMainWindow):
             intervalVariation = "[%g, %g]" % (variationSerias[i][0], variationSerias[i][1])
             theoreticalVariation = "[%g, %g]" % (theoreticalBorders[i][0], theoreticalBorders[i][1])
 
+            if i == 0:
+                theoreticalVariation = "[-∞, %g]" % (theoreticalBorders[i][1]) 
+            elif i == countColumns-1:
+                theoreticalVariation = "[%g, +∞]" % (theoreticalBorders[i][0])
+
             self.ui.intervalSeries.horizontalHeader().resizeSection(i, len(intervalVariation) * 12)
-            self.ui.intervalSeries.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(''))
 
-            self.ui.intervalSeries.setItem(0, i, QtWidgets.QTableWidgetItem(intervalVariation))
-            #self.ui.intervalSeries.item(0, i).setFlags(QtCore.Qt.ItemIsEnabled)
+            self.ui.intervalSeries.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(intervalVariation))
+            self.ui.intervalSeries.horizontalHeaderItem(i).setFlags(QtCore.Qt.ItemIsEnabled)
 
-            self.ui.intervalSeries.setItem(1, i, QtWidgets.QTableWidgetItem(str(frequency[i])))
-            #self.ui.intervalSeries.item(1, i).setFlags(QtCore.Qt.ItemIsEnabled)
+            self.ui.intervalSeries.setItem(0, i, QtWidgets.QTableWidgetItem(str(frequency[i])))
+            self.ui.intervalSeries.item(0, i).setFlags(QtCore.Qt.ItemIsEnabled)
 
             self.ui.theoreticalFrequencies.horizontalHeader().resizeSection(i, len(theoreticalVariation) * 12)
-            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(''))
 
-            self.ui.theoreticalFrequencies.setItem(0, i, QtWidgets.QTableWidgetItem(theoreticalVariation))
-            #self.ui.theoreticalFrequencies.item(0, i).setFlags(QtCore.Qt.ItemIsEnabled)
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(theoreticalVariation))
+            self.ui.theoreticalFrequencies.horizontalHeaderItem(i).setFlags(QtCore.Qt.ItemIsEnabled)
 
-            self.ui.theoreticalFrequencies.setItem(1, i, QtWidgets.QTableWidgetItem(str(theoreticalProbabilities[i])))
-            #self.ui.theoreticalFrequencies.item(1, i).setFlags(QtCore.Qt.ItemIsEnabled)
+            self.ui.theoreticalFrequencies.setItem(0, i, QtWidgets.QTableWidgetItem(str(theoreticalProbabilities[i])))
+            self.ui.theoreticalFrequencies.item(0, i).setFlags(QtCore.Qt.ItemIsEnabled)
+        
 
 
     def openFile(self):
@@ -252,10 +272,11 @@ class mywindow(QtWidgets.QMainWindow):
             self.ui.InitionalArray.setText(string_serias)
             #self.ui.interval_amount_button.setEnabled(True)
             #self.ui.interval_amount_spin_box.setEnabled(True)
-            self.solve()
+            
 
         except:
             QtWidgets.QMessageBox.warning(self, "Ошибка ввода", "Ошибка ввода!\nПроверьте корректность входного файла")
+        self.solve()
 
     def buildPlot(self):
         self.ui.graph.clear()
@@ -263,36 +284,43 @@ class mywindow(QtWidgets.QMainWindow):
         h = self.statistic.interval_series[0][1] - self.statistic.interval_series[0][0]
         var = self.statistic.interval_series
         w = [round((i / h), 4) for i in self.statistic.relative_frequency]
-        f = self.statistic.distribution_function
+
+        deltaX = (var[-1][1] - var[0][0])*0.05
+        self.ui.graph.setXRange(var[0][0]-deltaX, var[- 1][1]+deltaX)
+
         self.plotHistogramma(var, w)
 
-        var = self.statistic.grouped
-        #n = self.statistic.frequency
-        w = self.statistic.relative_frequency
-        f = self.statistic.distribution_function
-        self.plotPoligon(var, w)
+        var1 = self.statistic.grouped
+        print(var1, self.statistic.interval_series, w)
+
+        self.plotPoligon(var1, w)
+
+        leftBorder = self.statistic.interval_series[0][0]
+        rightBorder = self.statistic.interval_series[-1][1]
+        maxy = self.plotDistribution(leftBorder, rightBorder)
+
+        maxY = max(max(w),maxy)
+        self.ui.graph.setYRange(0, maxY*1.05)
+
+        
+    
+    def plotDistribution(self, leftBorder, rightBorder):
+        x = np.linspace(leftBorder,rightBorder, 1000)
+        a = self.statistic.average_sample
+        sigma = self.statistic.deviation
+        y = density.densityFunction(a,sigma,x)
+        self.ui.graph.plot(x,y, pen=self.pen2, name="Плотность распределения")
+        return max(y)
 
     def plotPoligon(self, variationSeries : list, periodicity : list):
-        symbol = "w"
-        text = "относительной частот"
-
-        self.ui.graph.setXRange(variationSeries[0], variationSeries[len(variationSeries) - 1])
-        self.ui.graph.setYRange(min(periodicity), max(periodicity))
-        self.ui.graph.setTitle("Полигон " + text, color=(0, 0, 0), size="15pt")
-        self.ui.graph.setLabel('left', symbol + "(x)", **self.style1)
         self.ui.graph.setLabel('bottom', "x", **self.style1)
-                
-        self.ui.graph.plot(variationSeries, periodicity, pen=self.pen, symbol='d', symbolSize=15, symbolBrush='r')
+        self.ui.graph.plot(variationSeries, periodicity, pen=self.pen1, symbol='d', symbolSize=15, symbolBrush='b', name="Ломанная")
 
     def plotHistogramma(self, interlans, periodicity):
-        symbol = "w(x)/h"
-        text = "относительной частот"
         amount = len(interlans)
         
-        self.ui.graph.setXRange(interlans[0][0], interlans[len(interlans) - 1][1])
+        
         self.ui.graph.setYRange(0, max(periodicity))
-        self.ui.graph.setTitle("Гистограмма " + text, color=(0, 0, 0), size="15pt")
-        self.ui.graph.setLabel('left', symbol, **self.style1)
         self.ui.graph.setLabel('bottom', "x", **self.style1)
 
         for i in range(len(interlans)):
@@ -312,7 +340,7 @@ class mywindow(QtWidgets.QMainWindow):
 
         xi = [interlans[amount - 1][1], interlans[amount - 1][1]]
         yi = [0, periodicity[amount - 1]]
-        self.ui.graph.plot(xi, yi, pen=self.pen)
+        self.ui.graph.plot(xi, yi, pen=self.pen, name="Гистограмма")
 
 def main():
     app = QtWidgets.QApplication([])

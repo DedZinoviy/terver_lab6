@@ -59,8 +59,8 @@ def transformBorders(bordersList, a, sigma):
         interval[0] = round((interval[0] - a)/sigma,4)
         interval[1] = round((interval[1] - a)/sigma,4)
     
-    #bordersList[0][0] = -np.Infinity
-    #bordersList[len(bordersList) - 1][1] = np.Infinity
+    bordersList[0][0] = -np.Infinity
+    bordersList[len(bordersList) - 1][1] = np.Infinity
 
 
 def getPropabilities(transformedIntervals):

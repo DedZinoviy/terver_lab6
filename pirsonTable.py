@@ -44,7 +44,7 @@ class Pirson():
     def khi_emp(numberOfIntervals, theoreticFrequenceList, empericFrequenceList):
         '''Функция для расчёта Хи квадрат наблюдаемое'''
         khi = 0
-        for i in range(0, numberOfIntervals - 1):
+        for i in range(0, numberOfIntervals):
             khi += (pow(empericFrequenceList[i]-theoreticFrequenceList[i], 2))/theoreticFrequenceList[i]
         return khi
 

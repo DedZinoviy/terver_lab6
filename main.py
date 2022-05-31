@@ -103,13 +103,13 @@ class mywindow(QtWidgets.QMainWindow):
 
         self.ui.graph = pg.PlotWidget()
         self.ui.graph.setBackground((225, 225, 225))
-        self.ui.graph.getAxis('left').setPen('black')
+        '''self.ui.graph.getAxis('left').setPen('black')
         self.ui.graph.getAxis('left').setTextPen('black')
         self.ui.graph.getAxis("left").setStyle(tickFont = font)
         self.ui.graph.getAxis('bottom').setPen('black')
         self.ui.graph.getAxis('bottom').setTextPen('black')
         self.ui.graph.getAxis("bottom").setStyle(tickFont = font)
-        self.ui.graph.showGrid(x=True, y=True, alpha=0.6)
+        self.ui.graph.showGrid(x=True, y=True, alpha=0.6)'''
 
 
         self.ui.openFileAction.triggered.connect(self.openFile)

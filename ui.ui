@@ -215,7 +215,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QWidget" name="graph" native="true">
+             <widget class="PlotWidget" name="graphWidget" native="true">
               <property name="minimumSize">
                <size>
                 <width>571</width>
@@ -476,6 +476,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header>pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

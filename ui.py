@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
         self.findDistributionDensity.setText("")
         self.findDistributionDensity.setObjectName("findDistributionDensity")
         self.verticalLayout.addWidget(self.findDistributionDensity)
-        self.graph = QtWidgets.QWidget(self.normalDistribution_p1)
+        self.graph = PlotWidget(self.normalDistribution_p1)
         self.graph.setMinimumSize(QtCore.QSize(571, 461))
         self.graph.setObjectName("graph")
         self.verticalLayout.addWidget(self.graph)
@@ -289,3 +289,4 @@ class Ui_MainWindow(object):
         self.menu.setTitle(_translate("MainWindow", "Ввести исходный массив"))
         self.openFileAction.setText(_translate("MainWindow", "Из файла"))
         self.inputIntervalSeriesAction.setText(_translate("MainWindow", "Интервальный (с клавиатуры)"))
+from pyqtgraph import PlotWidget

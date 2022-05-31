@@ -18,9 +18,9 @@ class Statistic():
         self.deviation = []
         self.corrected_deviation = []
 
-    def setSeries(self, series, intervalsAmount):
+    def setSeries(self, series):
         self.series = sorted(series)
-        self.intervals_amount = intervalsAmount
+        self.intervals_amount = mt.ceil(1+mt.log2(len(series)))
         self.amount = len(self.series)
         self.interval_series = self.intervalSeries(self.series, self.intervals_amount)
         self.frequency = self.intervalFrequencyRange(self.interval_series, self.series, self.intervals_amount)

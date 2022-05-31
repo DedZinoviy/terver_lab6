@@ -1,3 +1,4 @@
+from code import interact
 import math
 import numpy as np
 from scipy import integrate
@@ -48,16 +49,18 @@ def mergeIntervals(intervals, frequency):
         
         else:
             i += 1
+        
+        return intervalsAmount
 
 
 def transformBorders(bordersList, a, sigma):
     '''Функция преобразования границ интервалов'''
     for interval in bordersList:
-        interval[0] = (interval[0] - a)/sigma
-        interval[1] = (interval[1] - a)/sigma
+        interval[0] = round((interval[0] - a)/sigma,4)
+        interval[1] = round((interval[1] - a)/sigma,4)
     
-    bordersList[0][0] = -np.Infinity
-    bordersList[len(bordersList) - 1][1] = np.Infinity
+    #bordersList[0][0] = -np.Infinity
+    #bordersList[len(bordersList) - 1][1] = np.Infinity
 
 
 def getPropabilities(transformedIntervals):
@@ -66,7 +69,7 @@ def getPropabilities(transformedIntervals):
     for interval in transformedIntervals:
         propability, err = integrate.quad(propabilityFunction, interval[0], interval[1]) #зачем тут err, я не знаю, но без него не работает :)
         propability *= 1 / np.sqrt(2 * np.pi)
-        propabilities.append(propability)
+        propabilities.append(round(propability,4))
     return propabilities
 
 

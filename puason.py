@@ -3,7 +3,7 @@ from density import getTheoreticFrequency
 
 def getDensity(lamb):
     '''Возращает строковое представление плотности со значениями'''
-    densityPatern = "%g•exp(-%g)/xᵢ!"
+    densityPatern = "(%g^xᵢ)•exp(-%g)/xᵢ!"
     density = densityPatern % (lamb, lamb)
     return density
 
@@ -14,7 +14,6 @@ def getPropabilities(groupedSerias, lamb):
         propability = (lamb ** xi * np.exp(-lamb)) / np.math.factorial(xi)
         propabilities.append(propability)
     return propabilities
-
 
 def main():
     print(getDensity(2.3))

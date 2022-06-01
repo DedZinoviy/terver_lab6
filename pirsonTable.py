@@ -44,9 +44,15 @@ class Pirson():
     def khi_emp(numberOfIntervals, theoreticFrequenceList, empericFrequenceList):
         '''Функция для расчёта Хи квадрат наблюдаемое'''
         khi = 0
+        numenators = []
+        fractions = []
         for i in range(0, numberOfIntervals):
-            khi += (pow(empericFrequenceList[i]-theoreticFrequenceList[i], 2))/theoreticFrequenceList[i]
-        return khi
+            numenator = pow(empericFrequenceList[i]-theoreticFrequenceList[i], 2)
+            numenators.append(numenator)
+            fraction = (numenator)/theoreticFrequenceList[i]
+            fractions.append(fraction)
+            khi += fraction
+        return khi, numenators, fractions
 
     def isEqualKhi(empericKhi : float, criticalKhi : float):
         '''Функция сравнения Хи квадрат наблюдаемого и Хи квадрат критического'''

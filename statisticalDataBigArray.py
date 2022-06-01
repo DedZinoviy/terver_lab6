@@ -1,4 +1,5 @@
 from operator import le
+from re import S
 import numpy as np
 import math as mt
 
@@ -17,6 +18,11 @@ class Statistic():
         self.dispersion = []
         self.deviation = []
         self.corrected_deviation = []
+        self.groupedRange = []
+        self.groupedFrequency = []
+        self.groupedAverageSample = []
+        self.groupedDispersion = []
+        self.groupedCorrected_deviation = []
 
     def setSeries(self, series):
         self.series = sorted(series)
@@ -26,7 +32,11 @@ class Statistic():
         self.frequency = self.intervalFrequencyRange(self.interval_series, self.series, self.intervals_amount)
         self.countStatistic()
 
-    
+    def setGroupedSeries(self,series, frequency):
+        self.groupedRange = series
+        self.groupedFrequency = frequency
+        self.countStatisticGrouped()
+
     def setIntervals(self, intervalSerias, frequency):
         self.interval_series = intervalSerias
         self.frequency = frequency
@@ -35,6 +45,10 @@ class Statistic():
         self.countStatistic()
 
 
+    def countStatisticGrouped(self):
+        self.groupedAverageSample = self.averageSample(self.groupedRange, self.groupedFrequency)
+        self.groupedDispersion = self.sampleDispersion(self.groupedRange, self.groupedFrequency, self.groupedAverageSample)
+        self.groupedCorrected_deviation = self.correctedSampleAverageSquareDeviation(self.groupedDispersion, self.groupedFrequency)
     #Рассчитать величины
     def countStatistic(self):
         self.relative_frequency = self.intervalRelativeFrequencyRange(self.frequency, self.amount)

@@ -1,3 +1,4 @@
+from cmath import pi
 import statistics
 from turtle import color, width
 from xml.etree.ElementInclude import DEFAULT_MAX_INCLUSION_DEPTH
@@ -13,6 +14,8 @@ import pyqtgraph as pg
 import sys
 import re
 import copy
+from dialogGrouped import Ui_dialogGruupped
+import puason
 
 class dialogwindow(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -88,6 +91,64 @@ class dialogwindow(QtWidgets.QDialog):
                 self.ui.intervalsTable.setItem(0, i, QtWidgets.QTableWidgetItem(variation))
                 self.ui.intervalsTable.setItem(1, i, QtWidgets.QTableWidgetItem("5"))
 
+class dialogGroupped(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ui = Ui_dialogGruupped()
+        self.ui.setupUi(self)
+        
+        self.mainwindow = parent
+
+        self.buttons = self.ui.buttonBox.buttons()
+        self.buttons[0].setText("Ок")
+        self.buttons[1].setText("Отмена")
+
+        self.ui.countGrouped.setValue = 5
+
+        self.setTable()
+
+        self.ui.countGrouped.valueChanged.connect(self.setTable)
+    
+    def setTable(self):
+        columnCount = self.ui.countGrouped.value()
+
+        if columnCount < self.ui.tableWidget.columnCount():
+            self.ui.tableWidget.setColumnCount(columnCount)
+        else:
+            for i in range(self.ui.tableWidget.columnCount(), columnCount):
+                self.ui.tableWidget.insertColumn(i)
+
+                var = i
+                self.ui.tableWidget.setHorizontalHeaderItem(i, QtWidgets.QTableWidgetItem(''))
+                self.ui.tableWidget.horizontalHeader().resizeSection(i, 12)
+
+                self.ui.tableWidget.setItem(0, i, QtWidgets.QTableWidgetItem(str(var)))
+                self.ui.tableWidget.item(0,i).setFlags(QtCore.Qt.ItemIsEnabled)
+                self.ui.tableWidget.setItem(1, i, QtWidgets.QTableWidgetItem("1"))
+
+    def accept(self):
+        amount = self.ui.tableWidget.columnCount()
+        values= []
+        frequency = []
+            
+        try:
+            row_1 = self.ui.tableWidget.item(0, 0).text()
+            row_2 = self.ui.tableWidget.item(1, 0).text()
+            values.append(0)
+            frequency.append(int(row_2))
+            
+            for i in range(1, amount):
+                row_2 = self.ui.tableWidget.item(1, i).text()
+                values.append(i)
+                frequency.append(int(row_2))        
+                            
+            self.mainwindow.statistic.setGroupedSeries(values, frequency)
+            super().accept()
+        
+        except:
+            QtWidgets.QMessageBox.warning(self, "Ошибка ввода", "Некорректное значение")
+
+
 class mywindow(QtWidgets.QMainWindow):
     '''Конструктор гловного окна'''
     def __init__(self):
@@ -98,6 +159,7 @@ class mywindow(QtWidgets.QMainWindow):
         
 
         self.dialog = dialogwindow(parent=self)
+        self.dialogGroupped = dialogGroupped(parent=self)
         
         self.pen = pg.mkPen(color='r', width=3)
         self.pen1 = pg.mkPen(color='b', width=3)
@@ -121,6 +183,8 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.alpha.currentIndexChanged.connect(self.changeXi2crit)
         self.ui.compareButton.clicked.connect(self.compareXi2)
         self.ui.inputIntervalSeriesAction.triggered.connect(self.openDialog)
+        self.ui.distributionType.currentIndexChanged.connect(self.changeDistributionType)
+        self.ui.inputGroupedSeriesAction.triggered.connect(self.openDialogGroupped)
         #self.ui.plotType.currentIndexChanged.connect(self.buildPlot)
         #self.ui.openFileAction.triggered.connect(self.openFile)
         #self.ui.rangeType.currentIndexChanged.connect(self.changeRangeType)
@@ -134,9 +198,83 @@ class mywindow(QtWidgets.QMainWindow):
         self.setTables()
         self.setCharacteristic()
         self.setPointAssessments()
-        self.setXi2()
         self.setDensity()
-        self.buildPlot()     
+        self.setXi2()
+        self.buildPlot()  
+
+    def changeDistributionType(self):
+        if self.ui.distributionType.currentIndex() == 0: #нормальное
+            self.ui.inputIntervalSeriesAction.setEnabled(True)
+            self.ui.inputGroupedSeriesAction.setDisabled(True)
+
+            self.ui.sigma.setVisible(True)
+            self.ui.sigmaLabel.setVisible(True)
+
+            self.ui.aLabel.setText("a*")
+
+            self.ui.kFindLabel.setText("k = m - 3")
+
+            self.ui.InitionalArray.setVisible(True)
+            self.ui.InitionalArrayLabel.setVisible(True)
+
+            self.ui.distributionDensity.setPixmap(QtGui.QPixmap("img/normalDistribution.png"))
+
+            self.ui.intervalSeries.setVisible(True)
+            self.ui.intervalSeriesLabel.setVisible(True)
+            self.ui.openFileAction.setEnabled(True)
+
+            self.ui.theoreticalFrequencies.setColumnCount(0)
+            self.ui.theoreticalFrequencies.setRowCount(1)
+        else: #Пуассона
+            self.ui.inputGroupedSeriesAction.setEnabled(True)
+            self.ui.inputIntervalSeriesAction.setDisabled(True)
+            self.ui.openFileAction.setDisabled(True)
+
+            self.ui.sigma.setVisible(False)
+            self.ui.sigmaLabel.setVisible(False)
+
+            self.ui.aLabel.setText("λ*")
+            
+            self.ui.kFindLabel.setText("k = m - 2")
+
+            self.ui.InitionalArray.setVisible(False)
+            self.ui.InitionalArrayLabel.setVisible(False)
+
+            self.ui.distributionDensity.setPixmap(QtGui.QPixmap("img/puassonDistribution.png"))
+
+            self.ui.intervalSeries.setVisible(False)
+            self.ui.intervalSeriesLabel.setVisible(False)
+
+            self.ui.theoreticalFrequencies.setColumnCount(6)
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(0, QtWidgets.QTableWidgetItem("xᵢ"))
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(1, QtWidgets.QTableWidgetItem("mᵢ"))
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(2, QtWidgets.QTableWidgetItem("pᵢ"))
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(3, QtWidgets.QTableWidgetItem("n⋅pᵢ"))
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(4, QtWidgets.QTableWidgetItem("(mᵢ-npᵢ)²"))
+            self.ui.theoreticalFrequencies.setHorizontalHeaderItem(5, QtWidgets.QTableWidgetItem("(mᵢ-npᵢ)²/npᵢ"))
+            self.ui.theoreticalFrequencies.setRowCount(0)
+        
+        self.ui.averageSample.clear()
+        self.ui.sampleDispersion.clear()
+        self.ui.sampleAverageSquareDeviation.clear()
+        self.ui.aFind.clear()
+        self.ui.sigma.clear()
+        self.ui.kFind.clear()
+        self.ui.xi2.clear()
+        self.ui.xi2crit.clear()
+        self.ui.resultCompare.clear()
+        self.ui.graph.clear()
+        self.solve()
+            
+
+    def openDialogGroupped(self):
+        if self.dialogGroupped.exec():
+                try:
+                    self.solve()
+                except:
+                    pass
+        else:
+            print("Cansel")
 
     def openDialog(self):
         if self.dialog.exec():
@@ -153,22 +291,34 @@ class mywindow(QtWidgets.QMainWindow):
             empXi = float(self.ui.xi2.text())
             critXi = float(self.ui.xi2crit.text())
             resCompare = pt.Pirson.isEqualKhi(empXi, critXi)
+            distStr1 = ["нормальному", ""]
+            distStr2 = ["", "Пуассона"]
+            distTypeIndex = self.ui.distributionType.currentIndex()
             if (resCompare):
-                strCompare = "Эмпирические данные не противоречат гипотезе о соответствии нормальному распределению"
+                strCompare = "Эмпирические данные не противоречат гипотезе о соответствии %s распределению %s" % (distStr1[distTypeIndex], distStr2[distTypeIndex])
             else:
-                strCompare = "Отвергаем гипотезу о соответствии нормальному распределению"
+                strCompare = "Отвергаем гипотезу о соответствии %s распределению %s" % (distStr1[distTypeIndex], distStr2[distTypeIndex])
             
             self.ui.resultCompare.setText(strCompare)
         except:
             QtWidgets.QMessageBox.warning(self, "Ошибка данных", "Ошибка данных!\nВведите входные данные")
 
     def setDensity(self):
-        strDensity = "f(x)="+density.getDensity(self.statistic.average_sample, self.statistic.deviation)      
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            strDensity = "f(x)="+density.getDensity(self.statistic.average_sample, self.statistic.deviation)      
+        elif distType == 1:
+            strDensity = "P(X=xᵢ)="+puason.getDensity(self.statistic.groupedAverageSample)
         self.ui.findDistributionDensity.setText(strDensity)  
 
     def changeXi2crit(self):
-        countIntervals = len(self.statistic.frequency)
-        k = countIntervals - 3 ###Добавить в класс ???
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            countIntervals = len(self.statistic.frequency)
+            k = countIntervals - 3 ###Добавить в класс ???
+        elif distType == 1:
+            countIntervals = len(self.statistic.groupedFrequency)
+            k = countIntervals - 2
         alpha = float(self.ui.alpha.currentText())
 
         pirson = pt.Pirson()
@@ -177,25 +327,40 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.xi2crit.setText(str(xi2crit))
 
     def setPointAssessments(self):
-        a = "{:01.8}".format(self.statistic.average_sample)
-        sigma = "{:01.8}".format(self.statistic.deviation)
-
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            a = "{:01.8}".format(self.statistic.average_sample)
+            sigma = "{:01.8}".format(self.statistic.deviation)
+            self.ui.sigma.setText(sigma)
+        elif distType == 1:
+            a = "{:01.8}".format(self.statistic.groupedAverageSample)
+        
         self.ui.aFind.setText(a)
-        self.ui.sigma.setText(sigma)
+ 
 
     def setXi2(self):
-        theoreticalBorders =  copy.deepcopy(self.statistic.interval_series) ### Добавить в класс????
-        density.transformBorders(theoreticalBorders, self.statistic.average_sample, self.statistic.deviation)
-        theoreticalProbabilities = density.getPropabilities(theoreticalBorders) ### Добавить в класс????
-        theoreticFrequency = density.getTheoreticFrequency(theoreticalProbabilities,self.statistic.frequency)
-        countIntervals = len(theoreticFrequency)
-        xi2see = pt.Pirson.khi_emp(countIntervals, theoreticFrequency,self.statistic.frequency)
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            theoreticalBorders =  copy.deepcopy(self.statistic.interval_series) ### Добавить в класс????
+            density.transformBorders(theoreticalBorders, self.statistic.average_sample, self.statistic.deviation)
+            theoreticalProbabilities = density.getPropabilities(theoreticalBorders) ### Добавить в класс????
+            theoreticFrequency = density.getTheoreticFrequency(theoreticalProbabilities,self.statistic.frequency)
+            countIntervals = len(theoreticFrequency)
+            k = countIntervals - 3 ###Добавить в класс ???
+            empericalFrequency = self.statistic.frequency
+        elif distType == 1:
+            countIntervals = len(self.statistic.groupedFrequency)
+            lamb = lamb = round(self.statistic.groupedAverageSample,8)
+            propabilities = [round(i,4) for i in puason.getPropabilities(self.statistic.groupedRange, lamb)]
+            theoreticFrequency = [round(i,4) for i in puason.getTheoreticFrequency(propabilities, self.statistic.groupedFrequency)]
+            k = countIntervals - 2
+            empericalFrequency = self.statistic.groupedFrequency
+        
+        xi2see, var1, var2 = pt.Pirson.khi_emp(countIntervals, theoreticFrequency, empericalFrequency)
 
         xi2see = "{:01.8}".format(xi2see)
 
         self.ui.xi2.setText(xi2see)
-
-        k = countIntervals - 3 ###Добавить в класс ???
 
         self.ui.kFind.setText(str(k))
 
@@ -207,15 +372,64 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.xi2crit.setText(str(xi2crit))
 
     def setCharacteristic(self):
-        midX = "{:01.8}".format(self.statistic.average_sample)
-        d = "{:01.8}".format(self.statistic.dispersion)
-        S = "{:01.8}".format(self.statistic.corrected_deviation)
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            midX = "{:01.8}".format(self.statistic.average_sample)
+            d = "{:01.8}".format(self.statistic.dispersion)
+            S = "{:01.8}".format(self.statistic.corrected_deviation)
+        elif distType == 1:
+            midX = "{:01.8}".format(self.statistic.groupedAverageSample)
+            d = "{:01.8}".format(self.statistic.groupedDispersion)
+            S = "{:01.8}".format(self.statistic.groupedCorrected_deviation)
 
         self.ui.averageSample.setText(midX)
         self.ui.sampleDispersion.setText(d)
         self.ui.sampleAverageSquareDeviation.setText(S)
 
     def setTables(self):
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            self.setTablesNormal()
+        elif distType == 1:
+            self.setTablePuason()
+
+    def setTablePuason(self):
+        countRows = len(self.statistic.groupedRange)
+        self.ui.theoreticalFrequencies.setRowCount(countRows)
+
+        xi = [round(i,4) for i in self.statistic.groupedRange]
+        mi = [round(i,4) for i in self.statistic.groupedFrequency]
+        lamb = round(self.statistic.groupedAverageSample,8)
+        pi = [round(i,4) for i in puason.getPropabilities(xi, lamb)]
+        npi = [round(i,4) for i in puason.getTheoreticFrequency(pi, mi)]
+
+        Khi, sqr, sqrDevision  = pt.Pirson.khi_emp(countRows, npi, mi)
+
+        sqr = [round(i,4) for i in sqr]
+        sqrDevision = [round(i,4) for i in sqrDevision]
+
+        for i in range(countRows):
+            self.ui.theoreticalFrequencies.setItem(i, 0, QtWidgets.QTableWidgetItem(str(xi[i])))
+            self.ui.theoreticalFrequencies.item(i, 0).setFlags(QtCore.Qt.ItemIsEnabled)
+
+            self.ui.theoreticalFrequencies.setItem(i,1, QtWidgets.QTableWidgetItem(str(mi[i])))
+            self.ui.theoreticalFrequencies.item(i,1).setFlags(QtCore.Qt.ItemIsEnabled)
+
+            self.ui.theoreticalFrequencies.setItem(i,2, QtWidgets.QTableWidgetItem(str(pi[i])))
+            self.ui.theoreticalFrequencies.item(i,2).setFlags(QtCore.Qt.ItemIsEnabled)
+
+            self.ui.theoreticalFrequencies.setItem(i,3, QtWidgets.QTableWidgetItem(str(npi[i])))
+            self.ui.theoreticalFrequencies.item(i,3).setFlags(QtCore.Qt.ItemIsEnabled)
+
+            self.ui.theoreticalFrequencies.setItem(i,4, QtWidgets.QTableWidgetItem(str(sqr[i])))
+            self.ui.theoreticalFrequencies.item(i,4).setFlags(QtCore.Qt.ItemIsEnabled)
+
+            self.ui.theoreticalFrequencies.setItem(i,5, QtWidgets.QTableWidgetItem(str(sqrDevision[i])))
+            self.ui.theoreticalFrequencies.item(i,5).setFlags(QtCore.Qt.ItemIsEnabled)
+
+    
+
+    def setTablesNormal(self):
         countColumns = density.mergeIntervals(self.statistic.interval_series, self.statistic.frequency) #объединение интервалов
         self.statistic.countStatistic()
         self.ui.intervalSeries.setColumnCount(countColumns) #Установка количества колонок
@@ -280,29 +494,45 @@ class mywindow(QtWidgets.QMainWindow):
 
     def buildPlot(self):
         self.ui.graph.clear()
+        legend = self.ui.graph.addLegend(labelTextColor='k', labelTextSize='12pt', verSpacing=12)
 
-        h = self.statistic.interval_series[0][1] - self.statistic.interval_series[0][0]
-        var = self.statistic.interval_series
-        w = [round((i / h), 4) for i in self.statistic.relative_frequency]
+        distType = self.ui.distributionType.currentIndex()
+        if distType == 0:
+            h = self.statistic.interval_series[0][1] - self.statistic.interval_series[0][0]
+            var = self.statistic.interval_series
+            w = [round((i / h), 4) for i in self.statistic.relative_frequency]
+            deltaX = (var[-1][1] - var[0][0])*0.05
 
-        deltaX = (var[-1][1] - var[0][0])*0.05
-        self.ui.graph.setXRange(var[0][0]-deltaX, var[- 1][1]+deltaX)
+            self.plotHistogramma(var, w)
 
-        self.plotHistogramma(var, w)
+            var1 = self.statistic.grouped
+            self.plotPoligon(var1, w, self.pen1, "Ломаная через середины")
 
-        var1 = self.statistic.grouped
-        print(var1, self.statistic.interval_series, w)
+            leftBorder = self.statistic.interval_series[0][0]
+            rightBorder = self.statistic.interval_series[-1][1]
+            maxy = self.plotDistribution(leftBorder, rightBorder)
 
-        self.plotPoligon(var1, w)
+            minX = var[0][0]
+            maxX = var[-1][1]
+            maxY = max(maxy, max(w))
+        elif distType == 1:
+            amount = sum(self.statistic.groupedFrequency)
+            relativeFrequency = [round(item/amount,4) for item in self.statistic.groupedFrequency]
+            var = self.statistic.groupedRange
+            self.plotPoligon(var, relativeFrequency, self.pen, "Эмпирически")
 
-        leftBorder = self.statistic.interval_series[0][0]
-        rightBorder = self.statistic.interval_series[-1][1]
-        maxy = self.plotDistribution(leftBorder, rightBorder)
+            lamb = round(self.statistic.groupedAverageSample,8)
+            propability = [round(i,4) for i in puason.getPropabilities(self.statistic.groupedRange, lamb)]
+            self.plotPoligon(var, propability, self.pen2, "Теоретически")
 
-        maxY = max(max(w),maxy)
+            minX = 0
+            maxX = self.statistic.groupedRange[-1]
+            deltaX = (maxX - minX)*0.05
+            maxY = 1
+
+        self.ui.graph.setXRange(minX-deltaX, maxX+deltaX)
         self.ui.graph.setYRange(0, maxY*1.05)
 
-        
     
     def plotDistribution(self, leftBorder, rightBorder):
         x = np.linspace(leftBorder,rightBorder, 1000)
@@ -312,9 +542,9 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.graph.plot(x,y, pen=self.pen2, name="Плотность распределения")
         return max(y)
 
-    def plotPoligon(self, variationSeries : list, periodicity : list):
+    def plotPoligon(self, variationSeries : list, periodicity : list, pen, name=""):
         self.ui.graph.setLabel('bottom', "x", **self.style1)
-        self.ui.graph.plot(variationSeries, periodicity, pen=self.pen1, symbol='d', symbolSize=15, symbolBrush='b', name="Ломанная")
+        self.ui.graph.plot(variationSeries, periodicity, pen=pen, symbol='d', symbolSize=15, symbolBrush='b', name=name)
 
     def plotHistogramma(self, interlans, periodicity):
         amount = len(interlans)

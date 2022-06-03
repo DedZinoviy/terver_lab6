@@ -164,6 +164,7 @@ class mywindow(QtWidgets.QMainWindow):
         self.pen = pg.mkPen(color='r', width=3)
         self.pen1 = pg.mkPen(color='b', width=3)
         self.pen2 = pg.mkPen(color='g', width=3)
+        self.pen3 = pg.mkPen(color='k', width=3)
         self.style1 = {'font-size':'30px'}
         font = QtGui.QFont()
         font.setPointSize(12)
@@ -264,6 +265,7 @@ class mywindow(QtWidgets.QMainWindow):
         self.ui.xi2crit.clear()
         self.ui.resultCompare.clear()
         self.ui.graph.clear()
+        self.ui.findDistributionDensity.clear()
         self.solve()
             
 
@@ -501,7 +503,6 @@ class mywindow(QtWidgets.QMainWindow):
             h = self.statistic.interval_series[0][1] - self.statistic.interval_series[0][0]
             var = self.statistic.interval_series
             w = [round((i / h), 4) for i in self.statistic.relative_frequency]
-            deltaX = (var[-1][1] - var[0][0])*0.05
 
             self.plotHistogramma(var, w)
 
@@ -515,6 +516,7 @@ class mywindow(QtWidgets.QMainWindow):
             minX = var[0][0]
             maxX = var[-1][1]
             maxY = max(maxy, max(w))
+            minY = 0
         elif distType == 1:
             amount = sum(self.statistic.groupedFrequency)
             relativeFrequency = [round(item/amount,4) for item in self.statistic.groupedFrequency]
@@ -526,12 +528,12 @@ class mywindow(QtWidgets.QMainWindow):
             self.plotPoligon(var, propability, self.pen2, "Теоретически")
 
             minX = 0
+            minY = min(min(relativeFrequency), min(propability))
             maxX = self.statistic.groupedRange[-1]
-            deltaX = (maxX - minX)*0.05
-            maxY = 1
+            maxY = max(max(relativeFrequency), max(propability))
 
-        self.ui.graph.setXRange(minX-deltaX, maxX+deltaX)
-        self.ui.graph.setYRange(0, maxY*1.05)
+        self.ui.graph.setXRange(minX, maxX)
+        self.ui.graph.setYRange(minY, maxY)
 
     
     def plotDistribution(self, leftBorder, rightBorder):

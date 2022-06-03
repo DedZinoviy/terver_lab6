@@ -12,6 +12,8 @@ def getDensity(a, sigma):
 
     density = densityPatern % (k1, k2, a)
 
+    density = density.replace("--","•")
+
     return density
 
 

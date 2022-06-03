@@ -5,6 +5,7 @@ def getDensity(lamb):
     '''Возращает строковое представление плотности со значениями'''
     densityPatern = "(%g^xᵢ)•exp(-%g)/xᵢ!"
     density = densityPatern % (lamb, lamb)
+    density = density.replace("--","")
     return density
 
 

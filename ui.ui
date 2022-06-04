@@ -275,46 +275,6 @@
               <string>0.1</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>0.25</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.5</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.75</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.9</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.95</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.975</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.99</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>0.995</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item row="0" column="1">
